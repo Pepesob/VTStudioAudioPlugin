@@ -5,7 +5,8 @@
 
 #include <stdio.h>
 #include <stdlib.h>
-
+#include <stdlib.h>
+#include <windows.h>
 
 
 int testListen() {
@@ -16,7 +17,7 @@ int testListen() {
     }
 
 
-    int chunks =  100;
+    int chunks =  20;
     unsigned char* buff = (unsigned char*) malloc(getAudioBufferByteSize() * chunks);
     for (int i=0; i<chunks; i++){
         printf("Iteracja %d\n", i);
@@ -26,7 +27,10 @@ int testListen() {
         }
     }
 
-    saveWav("mysound.wav", buff, getAudioBufferByteSize() * chunks, (WaveFormat*) getWaveFormatExtensible());
+    WaveFormatSimple simple;
+    memcpy(&simple, getWaveFormatExtensible(), sizeof(WaveFormatSimple));
+
+    saveWav2("mysound.wav", buff, getAudioBufferByteSize() * chunks, &simple);
 
     return 0;
 }
@@ -74,5 +78,8 @@ int main() {
     initializeDevice("{0.0.0.00000000}.{6c661f6c-d8e3-4d63-b910-3683742085b4}");
 
     printWaveFormat();
+
+
+    testListen();
     releaseDevice();
 }

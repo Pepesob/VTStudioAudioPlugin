@@ -209,7 +209,7 @@ size_t getAudioBufferByteSize() {
     return audioBufferByteSize;
 }
 
-int isDeviceInitialized() {
+bool isDeviceInitialized() {
     return deviceInitialized;
 }
 

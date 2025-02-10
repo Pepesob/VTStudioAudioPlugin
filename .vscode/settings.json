@@ -59,6 +59,7 @@
         "setupapi.h": "c",
         "mmreg.h": "c",
         "functiondiscoverykeys_devpkey.h": "c",
-        "stdlib.h": "c"
+        "stdlib.h": "c",
+        "mcaudiolisten.h": "c"
     }
 }
