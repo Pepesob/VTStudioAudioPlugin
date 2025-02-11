@@ -12,8 +12,7 @@ void releaseDevice();
 bool isDeviceInitialized();
 
 size_t getAudioBufferByteSize();
-WaveFormat* getWaveFormat();
-WaveFormatExtensible* getWaveFormatExtensible();
+int getWaveFormat(WaveFormat* waveFormat);
 
 int deviceListen(uint8_t* buffer);
 

@@ -27,10 +27,10 @@ int testListen() {
         }
     }
 
-    WaveFormatSimple simple;
-    memcpy(&simple, getWaveFormatExtensible(), sizeof(WaveFormatSimple));
+    WaveFormat simple;
+    getWaveFormat(&simple);
 
-    saveWav2("mysound.wav", buff, getAudioBufferByteSize() * chunks, &simple);
+    saveWav("mysound.wav", buff, getAudioBufferByteSize() * chunks, &simple);
 
     return 0;
 }
@@ -45,29 +45,20 @@ int discoverDeviceTest() {
 }
 
 int printWaveFormat() {
-    WaveFormatExtensible* wfExt = getWaveFormatExtensible();
+    WaveFormat format;
+    getWaveFormat(&format);
     printf("WaveFormatExtensible Structure:\n");
-    printf("  Format Tag: %u\n", wfExt->Format.wFormatTag);
-    printf("  Channels: %u\n", wfExt->Format.nChannels);
-    printf("  Sample Rate: %u Hz\n", wfExt->Format.nSamplesPerSec);
-    printf("  Avg Bytes Per Sec: %u\n", wfExt->Format.nAvgBytesPerSec);
-    printf("  Block Align: %u\n", wfExt->Format.nBlockAlign);
-    printf("  Bits Per Sample: %u\n", wfExt->Format.wBitsPerSample);
-    printf("  Extra Info Size: %u\n", wfExt->Format.cbSize);
-
-    // Depending on the format, print the appropriate sample data
-    if (wfExt->Format.wFormatTag == 0xFFFE) {
-        // WaveFormatExtensible (non-PCM format)
-        printf("  Valid Bits Per Sample: %u\n", wfExt->Samples.wValidBitsPerSample);
-    } else {
-        // PCM or other formats
-        printf("  Samples Per Block: %u\n", wfExt->Samples.wSamplesPerBlock);
-    }
-
-    printf("  Channel Mask: 0x%X\n", wfExt->dwChannelMask);
+    printf("  Format Tag: %u\n", format.wFormatTag);
+    printf("  Channels: %u\n", format.nChannels);
+    printf("  Sample Rate: %u Hz\n", format.nSamplesPerSec);
+    printf("  Avg Bytes Per Sec: %u\n", format.nAvgBytesPerSec);
+    printf("  Block Align: %u\n", format.nBlockAlign);
+    printf("  Bits Per Sample: %u\n", format.wBitsPerSample);
+    printf("  Extra Info Size: %u\n", format.cbSize);
+    printf("  Channel Mask: 0x%X\n", format.dwChannelMask);
     printf("  SubFormat (GUID): ");
     for (int i = 0; i < 16; i++) {
-        printf("%02X ", wfExt->SubFormat[i]);
+        printf("%02X ", format.subFormat[i]);
     }
     printf("\n");
 }
@@ -82,4 +73,6 @@ int main() {
 
     testListen();
     releaseDevice();
+
+    printf("\n");
 }

@@ -191,18 +191,18 @@ int deviceListen(uint8_t* buffer) {
 }
 
 
-WaveFormat* getWaveFormat() {
-    if (deviceInitialized){
-        return (WaveFormat*) audioFormat;
+int getWaveFormat(WaveFormat* waveFormat) {
+    if (!deviceInitialized){
+        return -1;
     }
-    return NULL;
-}
-
-WaveFormatExtensible* getWaveFormatExtensible() {
-    if (deviceInitialized && audioFormat->wFormatTag == WAVE_FORMAT_EXTENSIBLE){
-        return (WaveFormatExtensible*) audioFormat;
+    if (audioFormat->wFormatTag == WAVE_FORMAT_EXTENSIBLE){
+        memcpy(waveFormat, audioFormat, sizeof(WaveFormat));
     }
-    return NULL;
+    else {
+        memcpy(waveFormat, audioFormat, sizeof(WaveFormat) - 22);
+        memset(((uint8_t*)waveFormat) + sizeof(WaveFormat) - 22, 0, 22);
+    }
+    return 0;
 }
 
 size_t getAudioBufferByteSize() {

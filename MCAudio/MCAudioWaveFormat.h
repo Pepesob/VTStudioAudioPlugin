@@ -12,16 +12,10 @@ typedef struct {
     uint16_t nBlockAlign;       // Block size of data (nChannles * wBitsPerSample / 8)
     uint16_t wBitsPerSample;    // Number of bits per sample
     uint16_t cbSize;            // Size of extra information if WaveFormatExtensible supported (wFormatTag == oxFFFE)
+    uint16_t samples;
+    uint32_t dwChannelMask;
+    uint8_t subFormat[16];
 } WaveFormat;
 
-typedef struct {
-    WaveFormat Format;     // Base structure
-    union {
-        uint16_t wValidBitsPerSample; // Bits of precision (used when non-PCM)
-        uint16_t wSamplesPerBlock;
-        uint16_t wReserved;
-    } Samples;
-    uint32_t dwChannelMask;  // Speaker position mask
-    uint8_t SubFormat[16];   // GUID 
-} WaveFormatExtensible;
+
 #pragma pack(pop)

@@ -2,6 +2,7 @@
 
 #include <stdio.h>
 #include <string.h>
+#include <stdlib.h>
 
 
 void printHex(const void *buffer, size_t size) {
@@ -12,84 +13,66 @@ void printHex(const void *buffer, size_t size) {
     printf("\n"); 
 }
 
+// This function allocates memory and writes address to headerBuffer, it is users responsibility to
+// free this memory after it is no longer needed
+int createWavHeader(uint8_t** headerBuffer, size_t* retHeaderSize, uint32_t dataSize, WaveFormat* waveFormat){
+    if (headerBuffer == NULL || retHeaderSize  == NULL || waveFormat  == NULL) {
+        return -1;
+    }
+
+    size_t baseHeaderSize = 44; // PCM format header size
+    
+    size_t extraSize = (waveFormat->wFormatTag == 0xFFFE) ? 24 : 0; // 0xFFFE info
+    size_t dataFormatSize = 16 + extraSize;
+    size_t headerSize = baseHeaderSize + extraSize;
+
+    size_t totalSize = baseHeaderSize + extraSize + dataSize; // RIFF header + fmt chunk
+
+    *headerBuffer = (uint8_t*)malloc(totalSize);
+    if (!*headerBuffer) {
+        return -1;
+    }
+    *retHeaderSize = headerSize;
+
+    uint8_t* ptr = *headerBuffer;
+
+    // RIFF Header
+    memcpy(ptr, "RIFF", 4); ptr += 4;
+    uint32_t fileSizeMinus8 = totalSize - 8;
+    memcpy(ptr, &fileSizeMinus8, 4); ptr += 4;
+    memcpy(ptr, "WAVE", 4); ptr += 4;
+
+    // fmt Chunk
+    memcpy(ptr, "fmt ", 4); ptr += 4;
+    memcpy(ptr, &dataFormatSize, 4); ptr += 4;
+
+    memcpy(ptr, waveFormat, 16); ptr += 16;
+    
+    if (waveFormat->wFormatTag == 0xFFFE) {
+        memcpy(ptr, ((uint8_t*)waveFormat) + 16, 24); ptr += 24;
+    }
+
+    memcpy(ptr, "data", 4); ptr += 4;
+    memcpy(ptr, &dataSize, 4); ptr += 4;
+
+    return 0;
+}
+
+
 void saveWav(const char *filename, unsigned char *buffer, uint32_t bufferSize, WaveFormat *waveFormat) {
     FILE *file = fopen(filename, "wb");
     if (!file) {
         perror("Failed to open file");
         return;
     }
-    
-    // RIFF Header
-    fwrite("RIFF", 1, 4, file);
-    uint32_t chunkSize = 36 + bufferSize + (waveFormat->wFormatTag == 0xFFFE ? 24 : 0);
-    fwrite(&chunkSize, sizeof(uint32_t), 1, file);
-    fwrite("WAVE", 1, 4, file);
-    
-    // fmt chunk
-    fwrite("fmt ", 1, 4, file);
-    uint32_t subchunk1Size = (waveFormat->wFormatTag == 0xFFFE) ? 40 : 16;
-    fwrite(&subchunk1Size, sizeof(uint32_t), 1, file);
-    fwrite(waveFormat, sizeof(WaveFormat), 1, file);
-    
-    if (waveFormat->wFormatTag == 0xFFFE) {
-        // Write WaveFormatExtensible extra fields
-        WaveFormatExtensible *ext = (WaveFormatExtensible *)waveFormat;
-        fwrite(&ext->Samples, sizeof(uint16_t), 1, file);
-        fwrite(&ext->dwChannelMask, sizeof(uint32_t), 1, file);
-        fwrite(ext->SubFormat, sizeof(uint8_t), 16, file);
-    }
-    
-    // data chunk
-    fwrite("data", 1, 4, file);
-    fwrite(&bufferSize, sizeof(uint32_t), 1, file);
+
+    size_t headerSize;
+    uint8_t* headerBuffer;
+
+    createWavHeader(&headerBuffer, &headerSize, bufferSize, waveFormat);
+    fwrite(headerBuffer, 1, headerSize, file);
     fwrite(buffer, 1, bufferSize, file);
-    
-    fclose(file);
-}
-
-
-typedef struct {
-    uint16_t wFormatTag;        // Format type
-    uint16_t nChannels;         // Number of channels
-    uint32_t nSamplesPerSec;    // Sample rate in Hz
-    uint32_t nAvgBytesPerSec;   // Average bytes per second (nSamplesPerSec * nChannels * wBitsPerSample / 8)
-    uint16_t nBlockAlign;       // Block size of data (nChannles * wBitsPerSample / 8)
-    uint16_t wBitsPerSample;    // Number of bits per sample
-    uint16_t cbSize;            // Size of extra information if WaveFormatExtensible supported (wFormatTag == oxFFFE)
-    uint16_t samples;
-    uint32_t dwChannelMask;
-    uint8_t SubFormat[16];
-} WaveFormatSimple;
-
-
-void saveWav2(const char *filename, unsigned char *buffer, uint32_t bufferSize, WaveFormatSimple *waveFormat) {
-        FILE *file = fopen(filename, "wb");
-    if (!file) {
-        perror("Failed to open file");
-        return;
-    }
-    
-    // RIFF Header
-    fwrite("RIFF", 1, 4, file);
-    uint32_t chunkSize = 36 + bufferSize + (waveFormat->wFormatTag == 0xFFFE ? 24 : 0);
-    fwrite(&chunkSize, sizeof(uint32_t), 1, file);
-    fwrite("WAVE", 1, 4, file);
-    
-    // fmt chunk
-    fwrite("fmt ", 1, 4, file);
-    uint32_t subchunk1Size = (waveFormat->wFormatTag == 0xFFFE) ? 40 : 16;
-    fwrite(&subchunk1Size, sizeof(uint32_t), 1, file);
-    fwrite(waveFormat, 1, sizeof(WaveFormatSimple) - 22, file);
-    
-    // Write WaveFormatExtensible extra fields
-    if (waveFormat->wFormatTag == 0xFFFE) {
-        fwrite(((uint8_t*)waveFormat) + 18, 1, 22, file);
-    }
-    
-    // data chunk
-    fwrite("data", 1, 4, file);
-    fwrite(&bufferSize, sizeof(uint32_t), 1, file);
-    fwrite(buffer, 1, bufferSize, file);
+    free((void*)headerBuffer);
     
     fclose(file);
 }
