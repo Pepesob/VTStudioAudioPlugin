@@ -11,7 +11,7 @@ typedef struct {
     uint32_t nAvgBytesPerSec;   // Average bytes per second (nSamplesPerSec * nChannels * wBitsPerSample / 8)
     uint16_t nBlockAlign;       // Block size of data (nChannles * wBitsPerSample / 8)
     uint16_t wBitsPerSample;    // Number of bits per sample
-    uint16_t cbSize;            // Size of extra information if WaveFormatExtensible supported (wFormatTag == oxFFFE)
+    uint16_t cbSize;            // Size of extra information if WaveFormatExtensible supported (wFormatTag == 0xFFFE)
     uint16_t samples;
     uint32_t dwChannelMask;
     uint8_t subFormat[16];

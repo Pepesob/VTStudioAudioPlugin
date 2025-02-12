@@ -1,7 +1,7 @@
 CC=gcc
 CPPC=g++
 CFLAGS=
-LDLIBS=-lole32 -lsetupapi -luuid
+LDLIBS=-lole32 -lsetupapi -luuid -lksguid
 
 mcaudiomain: mcaudiolib
 	$(CC) $(CFLAGS) -c main.c -o main.o
@@ -14,7 +14,10 @@ mcaudioobj:
 	$(CC) $(CFLAGS) -c MCAudioInit.c -o MCAudioInit.o
 
 mcaudiolib: mcaudioobj
-	ar rcs MCAudio.lib MCAudioDiscover.o MCAudioListen.o MCAudioWaveSave.o MCAudioInit.o
+	ar rcs MCAudio.lib MCAudioDiscover.o MCAudioListen.o MCAudioWaveSave.o MCAudioInit.o 
+
+ffttest: mcaudiolib
+	$(CC) $(CFLAGS) MCAudioSpectrum.c -o MCAudioSpectrum.exe -L. -lMCAudio -llibfftw3f-3 $(LDLIBS)
 
 clean:
 	rm -rf *.exe *.lib *.o *.wav

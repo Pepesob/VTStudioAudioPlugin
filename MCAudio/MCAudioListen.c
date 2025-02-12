@@ -24,8 +24,8 @@
 #define AUDIO_BUFFER_WAIT_DIVIDER 2
 
 
-#define RETURN_ON_ERROR(RESULT, RCODE) if ((uint32_t) RESULT < 0) return RCODE
-#define BREAK_ON_ERROR(RESULT) if ((uint32_t) RESULT < 0) break
+#define RETURN_ON_ERROR(RESULT, RCODE) if (RESULT < 0) return RCODE
+#define BREAK_ON_ERROR(RESULT) if (RESULT < 0) break
 #define RETURN_ON_NULL(PTR, RCODE) if (PTR == NULL) return RCODE
 
 HRESULT fResult;
@@ -161,6 +161,7 @@ int deviceListen(uint8_t* buffer) {
 
     // now it works, make something to write silence to a buffer and it will be g, make sleep for half the buffer size
     while (bufferIndex < audioBufferByteSize) {
+        Sleep(getWaitTimeMs());
         uint32_t nextPacketSize = 0;
         fResult = audioCaptureClient->lpVtbl->GetNextPacketSize(audioCaptureClient, &nextPacketSize);
         BREAK_ON_ERROR(fResult);
@@ -179,7 +180,6 @@ int deviceListen(uint8_t* buffer) {
                 BREAK_ON_ERROR(fResult);
             }
         }
-        Sleep(getWaitTimeMs());
     }
 
     audioClient->lpVtbl->Stop(audioClient);

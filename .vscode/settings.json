@@ -60,6 +60,9 @@
         "mmreg.h": "c",
         "functiondiscoverykeys_devpkey.h": "c",
         "stdlib.h": "c",
-        "mcaudiolisten.h": "c"
+        "mcaudiolisten.h": "c",
+        "fftw3.h": "c",
+        "stdint.h": "c",
+        "mcaudiodiscover.h": "c"
     }
 }
