@@ -1,7 +1,7 @@
 CC=gcc
 CPPC=g++
 CFLAGS=
-LDLIBS=-lole32 -lsetupapi -luuid -lksguid -lntdll
+LDLIBS=-lole32 -lsetupapi -luuid -lksguid -lntdll -llibfftw3f-3
 
 
 # Compiling main executable
@@ -23,9 +23,12 @@ mcaudiowavesave-obj:
 mcaudiolisten-obj:
 	$(CC) $(CFLAGS) -c MCAudioListen.c -o MCAudioListen.o
 
+mcaudiospectrum-obj:
+	$(CC) $(CFLAGS) -c MCAudioSpectrum.c -o MCAudioSpectrum.o
+
 # Creating mcaudio static library
-mcaudiolib: mcaudioinit-obj mcaudiodiscover-obj mcaudiowavesave-obj mcaudiolisten-obj
-	ar rcs MCAudio.lib MCAudioDiscover.o MCAudioListen.o MCAudioWaveSave.o MCAudioInit.o 
+mcaudiolib: mcaudioinit-obj mcaudiodiscover-obj mcaudiowavesave-obj mcaudiolisten-obj mcaudiospectrum-obj
+	ar rcs MCAudio.lib MCAudioSpectrum.o MCAudioDiscover.o MCAudioListen.o MCAudioWaveSave.o MCAudioInit.o 
 
 ffttest: mcaudiolib
 	$(CC) $(CFLAGS) MCAudioSpectrum.c -o MCAudioSpectrum.exe -L. -lMCAudio -llibfftw3f-3 $(LDLIBS)

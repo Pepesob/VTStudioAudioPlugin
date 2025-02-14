@@ -13,8 +13,9 @@ void releaseDevice();
 bool isDeviceInitialized();
 int getnActiveSessions();
 
-size_t getAudioBufferByteSize();
 int getWaveFormat(WaveFormat* waveFormat);
 
-int deviceListen(uint8_t* buffer);
+int deviceListen(uint8_t* buffer, size_t sizeB);
+int deviceListenMs(size_t timeMs, uint8_t** buffer, size_t* sizeResult);
+int deviceListenB(size_t bytes, uint8_t** buffer);
 

@@ -20,26 +20,42 @@ int testListen() {
         return -1;
     }
 
-
-    int chunks =  20;
-    unsigned char* buff = (unsigned char*) malloc(getAudioBufferByteSize() * chunks);
-    for (int i=0; i<chunks; i++){
-        printf("Iteracja %d\n", i);
-        int result = deviceListen(buff+i*getAudioBufferByteSize());
-        if (result < 0){
-            printf("Device listen error!\n");
-        }
-    }
+    uint8_t* buff;
+    size_t buffSize;
+    deviceListenB(1000000, &buff);
 
     WaveFormat simple;
     getWaveFormat(&simple);
 
-    saveWav("mysound.wav", buff, getAudioBufferByteSize() * chunks, &simple);
+    saveWav("mysound.wav", buff, buffSize, &simple);
+
+    free(buff);
 
     return 0;
 }
 
 int testFFT(){
+    int res = initializeDevice("{0.0.0.00000000}.{2adae94c-0d5d-4585-bfe6-6bcaf7421347}");
+    if (res < 0){
+        printf("Error: %d\n", res);
+        return -1;
+    }
+    WaveFormat format;
+    getWaveFormat(&format);
+    WaveFrequencyInfo* wfi;
+
+    for(int j=0; j<100; j++){
+        uint8_t* buff;
+        deviceListenB(128, &buff);
+        soundFrequencyAnalysis(buff, &wfi, 128, DATA_TYPE_FLOAT32, format.nChannels, format.nSamplesPerSec);
+
+        for (size_t i = 0; i < wfi->size; i++) {
+            printf("%e, ", wfi->magnitudeArr[i]);
+        }
+        printf("\n");
+        freeWaveFrequencyInfo(wfi);
+    }
+
     return 0;
 }
 
@@ -79,16 +95,17 @@ int printWaveFormat() {
 
 int main() {
     printf("Test\n");
-    discoverDeviceTest();
+    // discoverDeviceTest();
     
-    int res = initializeDevice("{0.0.0.00000000}.{2adae94c-0d5d-4585-bfe6-6bcaf7421347}");
+    // int res = initializeDevice("{0.0.0.00000000}.{2adae94c-0d5d-4585-bfe6-6bcaf7421347}");
 
-    printf("Result: %d\n", res);
+    // printf("Result: %d\n", res);
 
-    printf("Num active sessions: %d\n", getnActiveSessions());
+    // printf("Num active sessions: %d\n", getnActiveSessions());
 
-    printWaveFormat();
+    // printWaveFormat();
 
-    testListen();
-    releaseDevice();
+    // testListen();
+    // releaseDevice();
+    testFFT();
 }
