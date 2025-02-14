@@ -14,6 +14,7 @@
 #include <mmdeviceapi.h>
 #include <functiondiscoverykeys_devpkey.h>
 #include <audioclient.h>
+#include <audiopolicy.h>
 
 #define MAX_DEVICE_STRING_LEN 100
 
@@ -35,6 +36,10 @@ IMMDevice* device = NULL;
 IAudioClient* audioClient = NULL;
 WAVEFORMATEX* audioFormat = NULL;
 IAudioCaptureClient* audioCaptureClient = NULL;
+IAudioSessionControl* audioSessionControl = NULL;
+IAudioSessionManager2* audioSessionManager2 = NULL; // TODO - IMPLEMENT RELEASING! MEMORY LEAK!
+IAudioSessionEnumerator* audioSessionEnumerator = NULL; // TODO - IMPLEMENT RELEASING! MEMORY LEAK!
+ISimpleAudioVolume* simpleAudioVolume = NULL;
 uint32_t bufferFrameCount = -1;
 uint8_t* audioBuffer = NULL;
 size_t audioBufferByteSize = -1;
@@ -61,6 +66,9 @@ void releaseDevice() {
     }
     if (audioCaptureClient != NULL){
         audioCaptureClient->lpVtbl->Release(audioCaptureClient);
+    }
+    if (audioSessionControl != NULL){
+        audioSessionControl->lpVtbl->Release(audioSessionControl);
     }
     if (audioFormat != NULL){
         CoTaskMemFree(audioFormat);
@@ -91,6 +99,12 @@ int initializeDevice(const char* strId) {
     fResult = device->lpVtbl->Activate(device, &IID_IAudioClient, CLSCTX_ALL, NULL, (void**) &audioClient);
     RETURN_ON_ERROR(fResult, -3);
 
+    fResult = device->lpVtbl->Activate(device, &IID_IAudioSessionManager2, CLSCTX_ALL, NULL, (void**) &audioSessionManager2);
+    RETURN_ON_ERROR(fResult, -3);
+
+    fResult = audioSessionManager2->lpVtbl->GetSessionEnumerator(audioSessionManager2, &audioSessionEnumerator);
+    RETURN_ON_ERROR(fResult, -3);
+
     fResult = audioClient->lpVtbl->GetMixFormat(audioClient, &audioFormat);
     RETURN_ON_ERROR(fResult, -4);
 
@@ -98,6 +112,12 @@ int initializeDevice(const char* strId) {
     RETURN_ON_ERROR(fResult, -5);
 
     fResult = audioClient->lpVtbl->GetService(audioClient, &IID_IAudioCaptureClient, (void **) &audioCaptureClient);
+    RETURN_ON_ERROR(fResult, fResult);
+
+    fResult = audioClient->lpVtbl->GetService(audioClient, &IID_IAudioSessionControl, (void **) &audioSessionControl);
+    RETURN_ON_ERROR(fResult, fResult);
+
+    fResult = audioClient->lpVtbl->GetService(audioClient, &IID_ISimpleAudioVolume, (void **) &simpleAudioVolume);
     RETURN_ON_ERROR(fResult, fResult);
 
     fResult = audioClient->lpVtbl->GetDevicePeriod(audioClient, &defaultDevicePeriod, NULL);
@@ -124,6 +144,58 @@ size_t getWaitTimeMs() {
         return getBufferSizeMs() / AUDIO_BUFFER_WAIT_DIVIDER;
     }
     return -1;
+}
+#include <wchar.h>
+#include <winternl.h>
+
+int getnActiveSessions(){
+    // int sessionCount;
+    // IAudioSessionControl* ctrl;
+    // HRESULT res = audioSessionEnumerator->lpVtbl->GetCount(audioSessionEnumerator, &sessionCount);
+    // printf("-----------------------------\n");
+    // for (int i=0; i<sessionCount; i++){
+    //     LPWSTR name;
+    //     AudioSessionState state;
+    //     audioSessionEnumerator->lpVtbl->GetSession(audioSessionEnumerator, i, &ctrl);
+    //     ctrl->lpVtbl->GetDisplayName(ctrl, name);
+    //     ctrl->lpVtbl->GetState(ctrl, &state);
+    //     printf("Id: %d,   Device name: %ls,      Device state: %d\n", i, name, state);
+    // }
+
+    // LPWSTR name;
+    // AudioSessionState state;
+    // audioSessionControl->lpVtbl->GetDisplayName(audioSessionControl, &name);
+    
+    // audioSessionControl->lpVtbl->GetState(audioSessionControl, &state);
+    // printf("Device name: %ls   State: %d\n", name, state);
+
+    // float level;
+    // int mute;
+    // simpleAudioVolume->lpVtbl->GetMasterVolume(simpleAudioVolume, &level);
+    // simpleAudioVolume->lpVtbl->GetMute(simpleAudioVolume, &mute);
+
+    // printf("Audio master volume: %f,            Is mute: %d\n", level, mute);
+
+    uint32_t padding;
+    REFERENCE_TIME latency;
+    audioClient->lpVtbl->GetCurrentPadding(audioClient, &padding);
+    audioClient->lpVtbl->GetStreamLatency(audioClient, &latency);
+    LARGE_INTEGER time_prev;
+    LARGE_INTEGER time_after;
+
+
+    NtQuerySystemTime(&time_prev);
+
+
+    printf("Padding %u\n", padding);
+
+    printf("Default device period: %lld,             In ms: %lld,               Latency: %lld\n", defaultDevicePeriod,  defaultDevicePeriod * 100 / 1000000, latency);
+
+    NtQuerySystemTime(&time_after);
+
+    printf("printf duration:  %lld\n", (time_after.QuadPart - time_prev.QuadPart)*100 / 1000000);
+
+    return 1;
 }
 
 
@@ -156,22 +228,33 @@ int deviceListen(uint8_t* buffer) {
     DWORD flags;
     size_t bufferIndex = 0;
 
+    
+
     fResult = audioClient->lpVtbl->Start(audioClient);
     RETURN_ON_ERROR(fResult, -1);
 
+
+
     // now it works, make something to write silence to a buffer and it will be g, make sleep for half the buffer size
     while (bufferIndex < audioBufferByteSize) {
-        Sleep(getWaitTimeMs());
+        // Sleep(getWaitTimeMs());
+        Sleep(10);
         uint32_t nextPacketSize = 0;
         fResult = audioCaptureClient->lpVtbl->GetNextPacketSize(audioCaptureClient, &nextPacketSize);
+        nextPacketSize = 1; // TODO - delet this line
+        
+        
         BREAK_ON_ERROR(fResult);
-        if (nextPacketSize == 0){
-            bufferIndex += fillBuffer(buffer, NULL, bufferIndex, audioBufferByteSize, getWaitTimeMs() * 1000 * audioFormat->nAvgBytesPerSec);
-        }
+        // if (nextPacketSize == 0){
+        //     bufferIndex += fillBuffer(buffer, NULL, bufferIndex, audioBufferByteSize, getWaitTimeMs() * 1000 * audioFormat->nAvgBytesPerSec);
+        // }
+        printf("Sesion state: %d\n", getnActiveSessions());
+        if (false){}
         else {
             while (nextPacketSize != 0 && bufferIndex < audioBufferByteSize){
                 fResult = audioCaptureClient->lpVtbl->GetBuffer(audioCaptureClient, &data, &framesToRead, &flags, NULL, NULL);
                 BREAK_ON_ERROR(fResult);
+                printf("Packet size: %u\n", framesToRead);
                 bufferIndex += fillBuffer(buffer, data, bufferIndex, audioBufferByteSize, framesToRead * audioFormat->nBlockAlign);
                 fResult = audioCaptureClient->lpVtbl->ReleaseBuffer(audioCaptureClient, framesToRead);
                 framesToRead = 0;

@@ -14,7 +14,7 @@
 
 
 int testListen() {
-    int res = initializeDevice("{0.0.0.00000000}.{5cf1419a-62f1-4c5a-be55-ff7d9fc4d059}");
+    int res = initializeDevice("{0.0.0.00000000}.{2adae94c-0d5d-4585-bfe6-6bcaf7421347}");
     if (res < 0){
         printf("Error: %d\n", res);
         return -1;
@@ -78,14 +78,17 @@ int printWaveFormat() {
 
 
 int main() {
+    printf("Test\n");
     discoverDeviceTest();
-    int res = initializeDevice("{0.0.0.00000000}.{966b203e-3c32-4dd1-bb0a-bef2da7ed85a}");
+    
+    int res = initializeDevice("{0.0.0.00000000}.{2adae94c-0d5d-4585-bfe6-6bcaf7421347}");
 
+    printf("Result: %d\n", res);
+
+    printf("Num active sessions: %d\n", getnActiveSessions());
 
     printWaveFormat();
 
     testListen();
     releaseDevice();
-
-    printf("\n");
 }

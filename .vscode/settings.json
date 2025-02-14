@@ -63,6 +63,9 @@
         "mcaudiolisten.h": "c",
         "fftw3.h": "c",
         "stdint.h": "c",
-        "mcaudiodiscover.h": "c"
+        "mcaudiodiscover.h": "c",
+        "stddef.h": "c",
+        "stdbool.h": "c",
+        "mcaudiowaveformat.h": "c"
     }
 }
