@@ -66,6 +66,8 @@
         "mcaudiodiscover.h": "c",
         "stddef.h": "c",
         "stdbool.h": "c",
-        "mcaudiowaveformat.h": "c"
+        "mcaudiowaveformat.h": "c",
+        "string.h": "c",
+        "regex.h": "c"
     }
 }

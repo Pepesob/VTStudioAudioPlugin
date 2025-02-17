@@ -11,7 +11,6 @@
 int initializeDevice(const char* strId);
 void releaseDevice();
 bool isDeviceInitialized();
-int getnActiveSessions();
 
 int getWaveFormat(WaveFormat* waveFormat);
 

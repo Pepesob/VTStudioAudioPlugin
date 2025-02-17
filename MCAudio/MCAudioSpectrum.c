@@ -142,6 +142,7 @@ int soundFrequencyAnalysis(void* soundData, WaveFrequencyInfo** out, size_t soun
     freeWaveDecomposeData(waveDecomp);
     return 0;
 
+    // TODO - consider just free without checking for NULL
 sound_frequency_analysis_error:
     freeWaveDecomposeData(waveDecomp);
     FREE_IFN_NULL(freqArr);

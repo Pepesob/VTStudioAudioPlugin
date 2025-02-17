@@ -3,6 +3,7 @@
 #include "MCAudioWaveSave.h"
 #include "MCAudioListen.h"
 #include "MCAudioSpectrum.h"
+#include "MCAudioCLI.h"
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -92,20 +93,11 @@ int printWaveFormat() {
     printf("\n");
 }
 
+void mcaudio_cli_test() {
+    mcaudio_cli();
+}
+
 
 int main() {
-    printf("Test\n");
-    // discoverDeviceTest();
-    
-    // int res = initializeDevice("{0.0.0.00000000}.{2adae94c-0d5d-4585-bfe6-6bcaf7421347}");
-
-    // printf("Result: %d\n", res);
-
-    // printf("Num active sessions: %d\n", getnActiveSessions());
-
-    // printWaveFormat();
-
-    // testListen();
-    // releaseDevice();
-    testFFT();
+    mcaudio_cli_test();
 }

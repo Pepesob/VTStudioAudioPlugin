@@ -124,57 +124,6 @@ size_t getMinPacketSizeB() {
 }
 
 
-int getnActiveSessions(){
-    // int sessionCount;
-    // IAudioSessionControl* ctrl;
-    // HRESULT res = audioSessionEnumerator->lpVtbl->GetCount(audioSessionEnumerator, &sessionCount);
-    // printf("-----------------------------\n");
-    // for (int i=0; i<sessionCount; i++){
-    //     LPWSTR name;
-    //     AudioSessionState state;
-    //     audioSessionEnumerator->lpVtbl->GetSession(audioSessionEnumerator, i, &ctrl);
-    //     ctrl->lpVtbl->GetDisplayName(ctrl, name);
-    //     ctrl->lpVtbl->GetState(ctrl, &state);
-    //     printf("Id: %d,   Device name: %ls,      Device state: %d\n", i, name, state);
-    // }
-
-    // LPWSTR name;
-    // AudioSessionState state;
-    // audioSessionControl->lpVtbl->GetDisplayName(audioSessionControl, &name);
-    
-    // audioSessionControl->lpVtbl->GetState(audioSessionControl, &state);
-    // printf("Device name: %ls   State: %d\n", name, state);
-
-    // float level;
-    // int mute;
-    // simpleAudioVolume->lpVtbl->GetMasterVolume(simpleAudioVolume, &level);
-    // simpleAudioVolume->lpVtbl->GetMute(simpleAudioVolume, &mute);
-
-    // printf("Audio master volume: %f,            Is mute: %d\n", level, mute);
-
-    // uint32_t padding;
-    // REFERENCE_TIME latency;
-    // audioClient->lpVtbl->GetCurrentPadding(audioClient, &padding);
-    // audioClient->lpVtbl->GetStreamLatency(audioClient, &latency);
-    // LARGE_INTEGER time_prev;
-    // LARGE_INTEGER time_after;
-
-
-    // NtQuerySystemTime(&time_prev);
-
-
-    // printf("Padding %u\n", padding);
-
-    // printf("Default device period: %lld,             In ms: %lld,               Latency: %lld\n", defaultDevicePeriod,  defaultDevicePeriod * 100 / 1000000, latency);
-
-    // NtQuerySystemTime(&time_after);
-
-    // printf("printf duration:  %lld\n", (time_after.QuadPart - time_prev.QuadPart)*100 / 1000000);
-
-    return 1;
-}
-
-
 void memcpy0(void* dest, void* src, size_t n){
     if (src == NULL) {
         memset(dest, 0, n);

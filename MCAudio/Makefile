@@ -1,6 +1,6 @@
 CC=gcc
 CPPC=g++
-CFLAGS=
+CFLAGS= -g
 LDLIBS=-lole32 -lsetupapi -luuid -lksguid -lntdll -llibfftw3f-3
 
 
@@ -26,12 +26,12 @@ mcaudiolisten-obj:
 mcaudiospectrum-obj:
 	$(CC) $(CFLAGS) -c MCAudioSpectrum.c -o MCAudioSpectrum.o
 
-# Creating mcaudio static library
-mcaudiolib: mcaudioinit-obj mcaudiodiscover-obj mcaudiowavesave-obj mcaudiolisten-obj mcaudiospectrum-obj
-	ar rcs MCAudio.lib MCAudioSpectrum.o MCAudioDiscover.o MCAudioListen.o MCAudioWaveSave.o MCAudioInit.o 
+mcaudiocli-obj: mcaudiolib
+	$(CC) $(CFLAGS) -c MCAudioCLI.c -o MCAudioCLI.o
 
-ffttest: mcaudiolib
-	$(CC) $(CFLAGS) MCAudioSpectrum.c -o MCAudioSpectrum.exe -L. -lMCAudio -llibfftw3f-3 $(LDLIBS)
+# Creating mcaudio static library
+mcaudiolib: mcaudioinit-obj mcaudiodiscover-obj mcaudiowavesave-obj mcaudiolisten-obj mcaudiospectrum-obj mcaudiocli-obj
+	ar rcs MCAudio.lib MCAudioSpectrum.o MCAudioDiscover.o MCAudioListen.o MCAudioWaveSave.o MCAudioInit.o MCAudioCLI.o
 
 clean:
 	rm -rf *.exe *.lib *.o *.wav
